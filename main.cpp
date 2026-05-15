@@ -47,28 +47,28 @@ bool isSentenceEnd(char ch) {
     return ch == '.' || ch == '?' || ch == '!';
 }
 
-bool isAbbreviation(const string& sentence) {
+bool isAbbreviationWord(const string& word) {
     string lower = "";
 
-    for (char ch : sentence) {
+    for (char ch : word) {
         lower += tolower(ch);
     }
 
-    vector<string> abbreviations = {
-        "mr.", "mrs.", "ms.", "dr.", "prof.", "sr.", "jr.",
-        "st.", "vs.", "etc.", "e.g.", "i.e."
-    };
-
-    for (string abbr : abbreviations) {
-        if (lower.size() >= abbr.size()) {
-            if (lower.substr(lower.size() - abbr.size()) == abbr) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return lower == "mr" ||
+           lower == "mrs" ||
+           lower == "ms" ||
+           lower == "dr" ||
+           lower == "prof" ||
+           lower == "sr" ||
+           lower == "jr" ||
+           lower == "st";
 }
+
+bool isSupportedPunctuation(char ch) {
+    string punctuations = ".,?!;:()[]{}-";
+    return punctuations.find(ch) != string::npos;
+}
+
 
 vector<string> splitSentences(const string& text) {
     vector<string> sentences;
@@ -80,7 +80,7 @@ vector<string> splitSentences(const string& text) {
 
         if (isSentenceEnd(ch)) {
 
-            if (ch == '.' && isAbbreviation(currentSentence)) {
+            if (ch == '.' && isAbbreviationWord(currentSentence)) {
                 continue;
             }
 
@@ -99,29 +99,41 @@ vector<string> splitSentences(const string& text) {
     return sentences;
 }
 
-bool isSupportedPunctuation(char ch) {
-    string punctuations = ".,?!;:\"'()[]{}-";
-
-    return punctuations.find(ch) != string::npos;
-}
 
 string getPunctuationPattern(const string& sentence) {
     string pattern = "";
+    string currentWord = "";
+
     int wordPosition = 0;
     bool insideWord = false;
 
-    for (char ch : sentence) {
+    for (int i = 0; i < sentence.size(); i++) {
+        char ch = sentence[i];
 
         if (isalnum(ch)) {
             if (!insideWord) {
                 wordPosition++;
                 insideWord = true;
+                currentWord = "";
             }
+
+            currentWord += ch;
         }
         else {
             insideWord = false;
 
             if (isSupportedPunctuation(ch)) {
+
+                // Ignore period after abbreviation
+                if (ch == '.' && isAbbreviationWord(currentWord)) {
+                    continue;
+                }
+
+                // Ignore punctuation before any word
+                if (wordPosition == 0) {
+                    continue;
+                }
+
                 pattern += to_string(wordPosition);
                 pattern += ch;
             }
@@ -217,7 +229,7 @@ int main() {
                            "punctuation_dictionary.txt");
     
     // folderPath = demo or folderPath = books
-    string folderPath = "books";
+    string folderPath = "demo";
     // the function for each txt file (access each txt file)
     for (const auto& entry : fs::directory_iterator(folderPath)) {
         //1. Open and Read txt file and print it out

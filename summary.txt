@@ -1,0 +1,6 @@
+===== Summary Statistics =====
+Total files read: 3
+Total sentences processed: 35
+Total punctuation patterns found: 29
+Unique punctuation patterns: 21
+Most common pattern: 5. -> 5
