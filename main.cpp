@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace fs = filesystem;
+namespace fs = std::filesystem;
 
 struct SummaryStats {
     int totalFiles = 0;
@@ -221,58 +221,38 @@ void saveSummaryStats(const SummaryStats& stats, const unordered_map<string, int
 
 
 int main() {
-    // empty dictionary
     unordered_map<string, int> punctuationDict;
     SummaryStats stats;
-    // load the existing file and save it to punctuationDict
-    loadDictionaryFromFile(punctuationDict,
-                           "punctuation_dictionary.txt");
-    
-    // folderPath = demo or folderPath = books
-    string folderPath = "demo";
-    // the function for each txt file (access each txt file)
+
+    string folderPath = "demo"; // change path to "books" for real books
+
     for (const auto& entry : fs::directory_iterator(folderPath)) {
-        //1. Open and Read txt file and print it out
-        // reading path of txt
-        if (entry.path().extension() == ".txt") { // check the format of the file
-            // confirm to print out the path of the txt file
+
+        if (entry.path().extension() == ".txt") {
+
+            stats.totalFiles++;
+
             cout << "Reading file: "
                  << entry.path().filename()
                  << endl;
-            // open the file
+
             ifstream file(entry.path());
 
             if (!file) {
                 cout << "Cannot open file." << endl;
                 continue;
             }
-            stats.totalFiles++;
-            // reading the txt file by using stringstream
+
             stringstream buffer;
             buffer << file.rdbuf();
-            
-            // get the string
-            string text = buffer.str();
-            
-            cout << "Characters read: "
-                 << text.size()
-                 << endl;
 
-            // print out the book
-//            cout << "-------------------" << endl;
-//            cout << "context: "
-//                 << text
-//                 << endl;
-            
-            
-            // Get arrays of string (list of sentences)
+            string text = buffer.str();
+
             vector<string> sentences = splitSentences(text);
+
             stats.totalSentences += sentences.size();
-            
-//            3. split sentenses into words, count words possition and detect punctuation
-            
+
             for (string sentence : sentences) {
-//                cout << sentence << endl;
                 string pattern = getPunctuationPattern(sentence);
 
                 if (!pattern.empty()) {
@@ -280,13 +260,14 @@ int main() {
                     stats.totalPatterns++;
                 }
             }
-            
-//            printDictionary(punctuationDict);
-            saveDictionaryToFile(punctuationDict, "punctuation_dictionary.txt");
-            saveSummaryStats(stats, punctuationDict, "summary.txt");
-                
         }
     }
+
+    printDictionary(punctuationDict);
+
+    saveDictionaryToFile(punctuationDict, "punctuation_dictionary.txt");
+
+    saveSummaryStats(stats, punctuationDict, "summary.txt");
 
     return 0;
 }
