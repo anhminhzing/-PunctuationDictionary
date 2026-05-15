@@ -1,0 +1,15 @@
+Welcome to the compression project.
+
+Compression algorithms are useful.
+
+Data structures, such as maps and tries, are important.
+
+"Are you ready?" she asked.
+
+Yes! I am ready.
+
+Testing code is sometimes difficult.
+
+The project should save output to files.
+
+Can your program load old dictionaries?
